@@ -23,7 +23,6 @@
 		"@emdash-cms/plugin-webhook-notifier": "^0.1.2",
 		"astro": "^6.0.1",
 		"emdash": "latest",
-		"emdash-plugin-resend": "^0.2.0",
 		"react": "19.2.4",
 		"react-dom": "19.2.4"
 	},
