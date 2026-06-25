@@ -8,14 +8,6 @@ import emdash from "emdash/astro";
 import plugin from "emdash-plugin-resend";
 
 export default defineConfig({
-  integrations: [
-    emdash({
-      plugins: [plugin()],
-    }),
-  ],
-});
-
-export default defineConfig({
 	output: "server",
 	adapter: cloudflare(),
 	image: {
@@ -27,7 +19,7 @@ export default defineConfig({
 		emdash({
 			database: d1({ binding: "DB", session: "auto" }),
 			storage: r2({ binding: "MEDIA" }),
-			plugins: [formsPlugin()],
+			plugins: [formsPlugin(), plugin()],
 			sandboxed: [webhookNotifierPlugin()],
 			sandboxRunner: sandbox(),
 			marketplace: "https://marketplace.emdashcms.com",
