@@ -1,0 +1,619 @@
+diff --git a/astro.config.mjs b/astro.config.mjs
+index 7fb25da..f0f4583 100644
+--- a/astro.config.mjs
++++ b/astro.config.mjs
+@@ -33,10 +33,19 @@ export default defineConfig({
+ 	fonts: [
+ 		{
+ 			provider: fontProviders.google(),
+-			name: "Inter",
+-			cssVariable: "--font-sans",
+-			weights: [400, 500, 600, 700],
+-			fallbacks: ["sans-serif"],
++			name: "Playfair Display",
++			cssVariable: "--font-headline",
++			weights: [700, 800, 900],
++			styles: ["normal", "italic"],
++			fallbacks: ["Georgia", "serif"],
++		},
++		{
++			provider: fontProviders.google(),
++			name: "Source Serif 4",
++			cssVariable: "--font-body",
++			weights: [400, 600],
++			styles: ["normal", "italic"],
++			fallbacks: ["Georgia", "serif"],
+ 		},
+ 		{
+ 			provider: fontProviders.google(),
+diff --git a/src/components/PostCard.astro b/src/components/PostCard.astro
+index 09d1d9d..858a521 100644
+--- a/src/components/PostCard.astro
++++ b/src/components/PostCard.astro
+@@ -1,6 +1,7 @@
+ ---
+ import type { MediaValue, ContentBylineCredit } from "emdash";
+ import { Image } from "emdash/ui";
++import SectionLabel from "./SectionLabel.astro";
+ 
+ interface Props {
+ 	title: string;
+@@ -89,21 +90,17 @@ const formattedDate = date
+ 				{formattedDate && readingTime && <span class="meta-dot" />}
+ 				{readingTime && <span>{readingTime} min</span>}
+ 			</div>
++			{
++				tags && tags.length > 0 && (
++					<div class="card-kicker">
++						<SectionLabel label={tags[0].label} href={`/tag/${tags[0].slug}`} />
++					</div>
++				)
++			}
+ 			<h2 class="card-title">{title}</h2>
+ 			{excerpt && <p class="card-excerpt">{excerpt}</p>}
+ 		</div>
+ 	</a>
+-	{
+-		tags && tags.length > 0 && (
+-			<div class="card-tags">
+-				{tags.slice(0, 2).map((tag) => (
+-					<a href={`/tag/${tag.slug}`} class="card-tag">
+-						{tag.label}
+-					</a>
+-				))}
+-			</div>
+-		)
+-	}
+ </article>
+ 
+ <style>
+@@ -171,9 +168,14 @@ const formattedDate = date
+ 		background: var(--color-muted);
+ 	}
+ 
++	.card-kicker {
++		margin-bottom: var(--spacing-2);
++	}
++
+ 	.card-title {
++		font-family: var(--font-headline);
+ 		font-size: var(--font-size-xl);
+-		font-weight: 600;
++		font-weight: 800;
+ 		line-height: var(--leading-snug);
+ 		letter-spacing: var(--tracking-snug);
+ 		margin-bottom: var(--spacing-2);
+@@ -185,6 +187,7 @@ const formattedDate = date
+ 	}
+ 
+ 	.card-excerpt {
++		font-family: var(--font-body);
+ 		font-size: var(--font-size-base);
+ 		line-height: var(--leading-relaxed);
+ 		color: var(--color-text-secondary);
+@@ -194,31 +197,6 @@ const formattedDate = date
+ 		overflow: hidden;
+ 	}
+ 
+-	.card-tags {
+-		display: flex;
+-		flex-wrap: wrap;
+-		gap: var(--spacing-2);
+-		margin-top: var(--spacing-3);
+-	}
+-
+-	.card-tag {
+-		display: inline-block;
+-		padding: var(--tag-padding-y) var(--spacing-2);
+-		font-size: var(--font-size-xs);
+-		color: var(--color-text-secondary);
+-		background: var(--color-surface);
+-		border-radius: var(--radius);
+-		text-decoration: none;
+-		transition:
+-			color var(--transition-fast),
+-			background var(--transition-fast);
+-	}
+-
+-	.card-tag:hover {
+-		color: var(--color-text);
+-		background: var(--color-border);
+-	}
+-
+ 	/* Byline styles */
+ 	.card-bylines {
+ 		display: flex;
+diff --git a/src/components/SectionLabel.astro b/src/components/SectionLabel.astro
+new file mode 100644
+index 0000000..835718c
+--- /dev/null
++++ b/src/components/SectionLabel.astro
+@@ -0,0 +1,38 @@
++---
++/**
++ * Newspaper-style kicker label, e.g. ANALYSIS / OPINION / FIELD NOTES / LATEST.
++ * Renders as a link when href is given (typically a post's first tag),
++ * otherwise as plain text (e.g. a section heading like "Latest").
++ */
++interface Props {
++	label: string;
++	href?: string;
++}
++
++const { label, href } = Astro.props;
++---
++
++{
++	href ? (
++		<a href={href} class="section-label">{label}</a>
++	) : (
++		<span class="section-label">{label}</span>
++	)
++}
++
++<style>
++	.section-label {
++		display: inline-block;
++		font-family: var(--font-sans);
++		font-size: var(--font-size-xs);
++		font-weight: 700;
++		text-transform: uppercase;
++		letter-spacing: var(--tracking-wider);
++		color: var(--color-accent);
++		text-decoration: none;
++	}
++
++	a.section-label:hover {
++		color: var(--color-accent-hover);
++	}
++</style>
+diff --git a/src/layouts/Base.astro b/src/layouts/Base.astro
+index df078d8..a5f4312 100644
+--- a/src/layouts/Base.astro
++++ b/src/layouts/Base.astro
+@@ -81,7 +81,8 @@ const isLoggedIn = !!Astro.locals.user;
+ 	<head>
+ 		<meta charset="UTF-8" />
+ 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-		<Font cssVariable="--font-sans" preload />
++		<Font cssVariable="--font-headline" preload />
++		<Font cssVariable="--font-body" preload />
+ 		<Font cssVariable="--font-mono" />
+ 		<title>{fullTitle}</title>
+ 		<EmDashHead page={pageCtx} />
+@@ -102,13 +103,25 @@ const isLoggedIn = !!Astro.locals.user;
+ 	<body>
+ 		<EmDashBodyStart page={pageCtx} />
+ 		<header class="site-header">
+-			<nav class="nav">
+-				<a href="/" class="site-title">
++			<div class="masthead">
++				<a href="/" class="masthead-title">
+ 					{siteLogo
+ 						? <img src={siteLogo.url} alt={siteLogo.alt || siteTitle} class="site-logo-img" />
+ 						: siteTitle
+ 					}
+ 				</a>
++				{siteTagline && <p class="masthead-tagline">{siteTagline}</p>}
++			</div>
++			<nav class="nav">
++				<div class="nav-links">
++					{
++						menu?.items.map((item) => (
++							<a href={item.url} target={item.target}>
++								{item.label}
++							</a>
++						))
++					}
++				</div>
+ 				<div class="nav-right">
+ 					<LiveSearch
+ 						placeholder="Search..."
+@@ -118,15 +131,6 @@ const isLoggedIn = !!Astro.locals.user;
+ 						resultClass="site-search-result"
+ 						collections={["posts", "pages"]}
+ 					/>
+-					<div class="nav-links">
+-						{
+-							menu?.items.map((item) => (
+-								<a href={item.url} target={item.target}>
+-									{item.label}
+-								</a>
+-							))
+-						}
+-					</div>
+ 					{
+ 						isLoggedIn && (
+ 							<a href="/_emdash/admin" class="nav-admin">
+@@ -578,42 +582,61 @@ const isLoggedIn = !!Astro.locals.user;
+ 
+ 		<style>
+ 			.site-header {
+-				position: sticky;
+-				top: 0;
+-				z-index: 100;
+-				background: color-mix(in srgb, var(--color-bg) 65%, transparent);
+-				backdrop-filter: blur(12px);
+-				-webkit-backdrop-filter: blur(12px);
+-				border-bottom: 1px solid var(--color-border-subtle);
++				background: var(--color-bg);
+ 			}
+ 
+-			.nav {
+-				display: flex;
+-				justify-content: space-between;
+-				align-items: center;
++			.masthead {
+ 				max-width: var(--wide-width);
+ 				margin: 0 auto;
+-				padding: var(--spacing-4) var(--spacing-6);
+-				height: var(--nav-height);
++				padding: var(--spacing-8) var(--spacing-6) var(--spacing-6);
++				text-align: center;
++				border-bottom: 3px solid var(--color-text);
+ 			}
+ 
+-			.site-title {
+-				font-size: var(--font-size-lg);
+-				font-weight: 600;
++			.masthead-title {
++				display: inline-block;
++				font-family: var(--font-headline);
++				font-size: clamp(var(--font-size-4xl), 6vw, var(--font-size-5xl));
++				font-weight: 900;
+ 				color: var(--color-text);
+ 				text-decoration: none;
+-				letter-spacing: var(--tracking-snug);
++				letter-spacing: var(--tracking-tight);
+ 			}
+ 
+-			.site-title:hover {
+-				color: var(--color-accent);
++			.masthead-title:hover {
++				color: var(--color-text);
+ 			}
+ 
+ 			.site-logo-img {
+-				height: 48px;
++				height: 56px;
+ 				width: auto;
+ 				display: block;
+-				margin: -8px 0;
++				margin: 0 auto;
++			}
++
++			.masthead-tagline {
++				margin-top: var(--spacing-2);
++				font-family: var(--font-sans);
++				font-size: var(--font-size-xs);
++				font-weight: 700;
++				text-transform: uppercase;
++				letter-spacing: var(--tracking-wider);
++				color: var(--color-accent);
++			}
++
++			.nav {
++				position: sticky;
++				top: 0;
++				z-index: 100;
++				display: flex;
++				justify-content: space-between;
++				align-items: center;
++				max-width: var(--wide-width);
++				margin: 0 auto;
++				padding: 0 var(--spacing-6);
++				height: var(--nav-height);
++				background: var(--color-bg);
++				border-bottom: 1px solid var(--color-border);
+ 			}
+ 
+ 			.nav-right {
+@@ -625,7 +648,11 @@ const isLoggedIn = !!Astro.locals.user;
+ 			.nav-links {
+ 				display: flex;
+ 				gap: var(--spacing-5);
+-				font-size: var(--font-size-sm);
++				font-family: var(--font-sans);
++				font-size: var(--font-size-xs);
++				font-weight: 700;
++				text-transform: uppercase;
++				letter-spacing: var(--tracking-wide);
+ 			}
+ 
+ 			.nav-links a {
+@@ -780,8 +807,9 @@ const isLoggedIn = !!Astro.locals.user;
+ 			}
+ 
+ 			.footer-logo {
+-				font-size: var(--font-size-lg);
+-				font-weight: 600;
++				font-family: var(--font-headline);
++				font-size: var(--font-size-xl);
++				font-weight: 800;
+ 				color: var(--color-text);
+ 				text-decoration: none;
+ 				letter-spacing: var(--tracking-snug);
+@@ -922,9 +950,8 @@ const isLoggedIn = !!Astro.locals.user;
+ 			}
+ 
+ 			@media (max-width: 640px) {
+-				.site-header {
+-					position: relative;
+-					border-bottom: none;
++				.masthead {
++					padding: var(--spacing-6) var(--spacing-4) var(--spacing-4);
+ 				}
+ 
+ 				.nav {
+@@ -937,10 +964,6 @@ const isLoggedIn = !!Astro.locals.user;
+ 					padding: var(--spacing-3) var(--spacing-4);
+ 				}
+ 
+-				.site-title {
+-					font-size: var(--font-size-base);
+-				}
+-
+ 				.nav-right {
+ 					display: contents;
+ 				}
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 32d9bb5..10c1212 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -7,6 +7,7 @@ import {
+ import { Image } from "emdash/ui";
+ import Base from "../layouts/Base.astro";
+ import PostCard from "../components/PostCard.astro";
++import SectionLabel from "../components/SectionLabel.astro";
+ import { getReadingTime } from "../utils/reading-time";
+ import { resolveBlogSiteIdentity } from "../utils/site-identity";
+ 
+@@ -133,6 +134,12 @@ function formatDate(date: Date | null | undefined) {
+ 										{getReadingTime(featuredPost.data.content)} min read
+ 									</span>
+ 								</div>
++								{featuredTags.length > 0 && (
++									<SectionLabel
++										label={featuredTags[0].label}
++										href={`/tag/${featuredTags[0].slug}`}
++									/>
++								)}
+ 								<a
+ 									href={`/posts/${featuredPost.id}`}
+ 									class="featured-title-link"
+@@ -142,15 +149,6 @@ function formatDate(date: Date | null | undefined) {
+ 								{featuredPost.data.excerpt && (
+ 									<p class="featured-excerpt">{featuredPost.data.excerpt}</p>
+ 								)}
+-								{featuredTags.length > 0 && (
+-									<div class="featured-tags">
+-										{featuredTags.map((tag) => (
+-											<a href={`/tag/${tag.slug}`} class="featured-tag">
+-												{tag.label}
+-											</a>
+-										))}
+-									</div>
+-								)}
+ 							</div>
+ 						</div>
+ 					</section>
+@@ -301,10 +299,12 @@ function formatDate(date: Date | null | undefined) {
+ 	}
+ 
+ 	.featured-title {
++		font-family: var(--font-headline);
+ 		font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-4xl));
+-		font-weight: 700;
++		font-weight: 900;
+ 		line-height: var(--leading-tight);
+ 		letter-spacing: var(--tracking-tight);
++		margin-top: var(--spacing-2);
+ 		transition: color var(--transition-fast);
+ 	}
+ 
+@@ -314,36 +314,12 @@ function formatDate(date: Date | null | undefined) {
+ 	}
+ 
+ 	.featured-excerpt {
++		font-family: var(--font-body);
+ 		font-size: var(--font-size-lg);
+ 		line-height: var(--leading-relaxed);
+ 		color: var(--color-text-secondary);
+ 	}
+ 
+-	.featured-tags {
+-		display: flex;
+-		flex-wrap: wrap;
+-		gap: var(--spacing-2);
+-		margin-top: var(--spacing-2);
+-	}
+-
+-	.featured-tag {
+-		display: inline-block;
+-		padding: var(--tag-padding-y) var(--spacing-2);
+-		font-size: var(--font-size-xs);
+-		color: var(--color-text-secondary);
+-		background: var(--color-surface);
+-		border-radius: var(--radius);
+-		text-decoration: none;
+-		transition:
+-			color var(--transition-fast),
+-			background var(--transition-fast);
+-	}
+-
+-	.featured-tag:hover {
+-		color: var(--color-text);
+-		background: var(--color-border);
+-	}
+-
+ 	/* Section header */
+ 	.section-header {
+ 		display: flex;
+@@ -351,20 +327,25 @@ function formatDate(date: Date | null | undefined) {
+ 		align-items: baseline;
+ 		margin-bottom: var(--spacing-8);
+ 		padding-bottom: var(--spacing-4);
+-		border-bottom: 1px solid var(--color-border-subtle);
++		border-bottom: 3px solid var(--color-text);
+ 	}
+ 
+ 	.section-title {
++		font-family: var(--font-sans);
+ 		font-size: var(--font-size-sm);
+-		font-weight: 500;
++		font-weight: 700;
+ 		text-transform: uppercase;
+ 		letter-spacing: var(--tracking-wider);
+-		color: var(--color-muted);
++		color: var(--color-accent);
+ 	}
+ 
+ 	.section-link {
+-		font-size: var(--font-size-sm);
+-		color: var(--color-accent);
++		font-family: var(--font-sans);
++		font-size: var(--font-size-xs);
++		font-weight: 700;
++		text-transform: uppercase;
++		letter-spacing: var(--tracking-wide);
++		color: var(--color-text-secondary);
+ 		text-decoration: none;
+ 		transition: color var(--transition-fast);
+ 	}
+diff --git a/src/pages/posts/[slug].astro b/src/pages/posts/[slug].astro
+index afb4295..2add1ef 100644
+--- a/src/pages/posts/[slug].astro
++++ b/src/pages/posts/[slug].astro
+@@ -17,6 +17,7 @@ import {
+ } from "emdash/ui";
+ import Base from "../../layouts/Base.astro";
+ import PostCard from "../../components/PostCard.astro";
++import SectionLabel from "../../components/SectionLabel.astro";
+ import { getReadingTime } from "../../utils/reading-time";
+ import { resolveBlogSiteIdentity } from "../../utils/site-identity";
+ 
+@@ -222,6 +223,11 @@ const publishDate =
+ 						}
+ 						<span>{readingTime} min read</span>
+ 					</div>
++					{
++						tags.length > 0 && (
++							<SectionLabel label={tags[0].label} href={`/tag/${tags[0].slug}`} />
++						)
++					}
+ 					<h1 class="article-title" {...post.edit.title}>{post.data.title}</h1>
+ 					{
+ 						post.data.excerpt && (
+@@ -498,14 +504,17 @@ const publishDate =
+ 	}
+ 
+ 	.article-title {
++		font-family: var(--font-headline);
+ 		font-size: clamp(2rem, 5vw, var(--font-size-5xl));
+-		font-weight: 700;
++		font-weight: 900;
+ 		line-height: var(--leading-tight);
+ 		letter-spacing: var(--tracking-tight);
++		margin-top: var(--spacing-2);
+ 		margin-bottom: var(--spacing-4);
+ 	}
+ 
+ 	.article-excerpt {
++		font-family: var(--font-body);
+ 		font-size: var(--font-size-xl);
+ 		line-height: var(--leading-relaxed);
+ 		color: var(--color-text-secondary);
+@@ -513,6 +522,7 @@ const publishDate =
+ 
+ 	/* Article content typography */
+ 	.article-content {
++		font-family: var(--font-body);
+ 		font-size: var(--font-size-lg);
+ 		line-height: var(--leading-relaxed);
+ 	}
+@@ -915,8 +925,9 @@ const publishDate =
+ 	}
+ 
+ 	.more-title {
++		font-family: var(--font-headline);
+ 		font-size: var(--font-size-2xl);
+-		font-weight: 600;
++		font-weight: 800;
+ 		margin-bottom: var(--spacing-10);
+ 	}
+ 
+diff --git a/src/styles/theme.css b/src/styles/theme.css
+index 2f7249b..eeef8a2 100644
+--- a/src/styles/theme.css
++++ b/src/styles/theme.css
+@@ -15,20 +15,27 @@
+ */
+ 
+ :root {
+-	/* --- Colors ---
+-	--color-bg: #ffffff;
+-	--color-bg-subtle: #fafafa;
+-	--color-text: #1a1a1a;
+-	--color-text-secondary: #525252;
+-	--color-muted: #8b8b8b;
+-	--color-border: #e5e5e5;
+-	--color-border-subtle: #f0f0f0;
+-	--color-surface: #f7f7f7;
+-	--color-accent: #0066cc;
+-	--color-accent-hover: #0052a3;
+-	--color-on-accent: white;
++	/* --- Fonts ---
++	--font-headline and --font-body are loaded via astro.config.mjs (Playfair
++	Display / Source Serif 4). --font-sans is Arial, a system font, so it
++	needs no loader -- it's set directly here and used for the masthead
++	tagline, nav, meta rows, and section-label kickers. */
++	--font-sans:
++		Arial, "Helvetica Neue", Helvetica, sans-serif;
++
++	/* --- Colors: old-time newspaper --- */
++	--color-bg: #f7f4ec;
++	--color-bg-subtle: #efe9d8;
++	--color-text: #1c1a17;
++	--color-text-secondary: #4a4640;
++	--color-muted: #8a8375;
++	--color-border: #d9d2bd;
++	--color-border-subtle: #e6e0cd;
++	--color-surface: #efe9d8;
++	--color-accent: #a13c1d;
++	--color-accent-hover: #7e2f16;
++	--color-on-accent: #f7f4ec;
+ 	--color-accent-ring: color-mix(in srgb, var(--color-accent) 25%, transparent);
+-	*/
+ 
+ 	/* --- Type scale ---
+ 	--font-size-xs: 0.8125rem;
+@@ -49,11 +56,12 @@
+ 	--leading-relaxed: 1.7;
+ 	*/
+ 
+-	/* --- Letter spacing ---
++	/* --- Letter spacing --- */
++	--tracking-wide: 0.08em;
++	--tracking-wider: 0.1em;
++	/*
+ 	--tracking-tight: -0.03em;    used on h1 and large titles
+ 	--tracking-snug: -0.02em;     used on h2–h6, site/card titles
+-	--tracking-wide: 0.06em;      used on meta labels, TOC/widget titles
+-	--tracking-wider: 0.08em;     used on footer headings, section labels
+ 	*/
+ 
+ 	/* --- Spacing ---
+@@ -80,10 +88,9 @@
+ 	--search-input-width: 180px;  nav search box width
+ 	*/
+ 
+-	/* --- Borders & radius ---
+-	--radius: 4px;
+-	--radius-lg: 8px;
+-	*/
++	/* --- Borders & radius: sharp corners, newspaper doesn't round --- */
++	--radius: 1px;
++	--radius-lg: 1px;
+ 
+ 	/* --- Transitions ---
+ 	--transition-fast: 120ms ease;

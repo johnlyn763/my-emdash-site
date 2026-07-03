@@ -17,6 +17,7 @@ import {
 } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
+import SectionLabel from "../../components/SectionLabel.astro";
 import { getReadingTime } from "../../utils/reading-time";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 
@@ -222,6 +223,11 @@ const publishDate =
 						}
 						<span>{readingTime} min read</span>
 					</div>
+					{
+						tags.length > 0 && (
+							<SectionLabel label={tags[0].label} href={`/tag/${tags[0].slug}`} />
+						)
+					}
 					<h1 class="article-title" {...post.edit.title}>{post.data.title}</h1>
 					{
 						post.data.excerpt && (
@@ -498,14 +504,17 @@ const publishDate =
 	}
 
 	.article-title {
+		font-family: var(--font-headline);
 		font-size: clamp(2rem, 5vw, var(--font-size-5xl));
-		font-weight: 700;
+		font-weight: 900;
 		line-height: var(--leading-tight);
 		letter-spacing: var(--tracking-tight);
+		margin-top: var(--spacing-2);
 		margin-bottom: var(--spacing-4);
 	}
 
 	.article-excerpt {
+		font-family: var(--font-body);
 		font-size: var(--font-size-xl);
 		line-height: var(--leading-relaxed);
 		color: var(--color-text-secondary);
@@ -513,6 +522,7 @@ const publishDate =
 
 	/* Article content typography */
 	.article-content {
+		font-family: var(--font-body);
 		font-size: var(--font-size-lg);
 		line-height: var(--leading-relaxed);
 	}
@@ -915,8 +925,9 @@ const publishDate =
 	}
 
 	.more-title {
+		font-family: var(--font-headline);
 		font-size: var(--font-size-2xl);
-		font-weight: 600;
+		font-weight: 800;
 		margin-bottom: var(--spacing-10);
 	}
 

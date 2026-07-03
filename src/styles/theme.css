@@ -15,20 +15,27 @@
 */
 
 :root {
-	/* --- Colors ---
-	--color-bg: #ffffff;
-	--color-bg-subtle: #fafafa;
-	--color-text: #1a1a1a;
-	--color-text-secondary: #525252;
-	--color-muted: #8b8b8b;
-	--color-border: #e5e5e5;
-	--color-border-subtle: #f0f0f0;
-	--color-surface: #f7f7f7;
-	--color-accent: #0066cc;
-	--color-accent-hover: #0052a3;
-	--color-on-accent: white;
+	/* --- Fonts ---
+	--font-headline and --font-body are loaded via astro.config.mjs (Playfair
+	Display / Source Serif 4). --font-sans is Arial, a system font, so it
+	needs no loader -- it's set directly here and used for the masthead
+	tagline, nav, meta rows, and section-label kickers. */
+	--font-sans:
+		Arial, "Helvetica Neue", Helvetica, sans-serif;
+
+	/* --- Colors: old-time newspaper --- */
+	--color-bg: #f7f4ec;
+	--color-bg-subtle: #efe9d8;
+	--color-text: #1c1a17;
+	--color-text-secondary: #4a4640;
+	--color-muted: #8a8375;
+	--color-border: #d9d2bd;
+	--color-border-subtle: #e6e0cd;
+	--color-surface: #efe9d8;
+	--color-accent: #a13c1d;
+	--color-accent-hover: #7e2f16;
+	--color-on-accent: #f7f4ec;
 	--color-accent-ring: color-mix(in srgb, var(--color-accent) 25%, transparent);
-	*/
 
 	/* --- Type scale ---
 	--font-size-xs: 0.8125rem;
@@ -49,11 +56,12 @@
 	--leading-relaxed: 1.7;
 	*/
 
-	/* --- Letter spacing ---
+	/* --- Letter spacing --- */
+	--tracking-wide: 0.08em;
+	--tracking-wider: 0.1em;
+	/*
 	--tracking-tight: -0.03em;    used on h1 and large titles
 	--tracking-snug: -0.02em;     used on h2–h6, site/card titles
-	--tracking-wide: 0.06em;      used on meta labels, TOC/widget titles
-	--tracking-wider: 0.08em;     used on footer headings, section labels
 	*/
 
 	/* --- Spacing ---
@@ -80,10 +88,9 @@
 	--search-input-width: 180px;  nav search box width
 	*/
 
-	/* --- Borders & radius ---
-	--radius: 4px;
-	--radius-lg: 8px;
-	*/
+	/* --- Borders & radius: sharp corners, newspaper doesn't round --- */
+	--radius: 1px;
+	--radius-lg: 1px;
 
 	/* --- Transitions ---
 	--transition-fast: 120ms ease;

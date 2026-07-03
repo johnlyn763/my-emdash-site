@@ -1,0 +1,38 @@
+---
+/**
+ * Newspaper-style kicker label, e.g. ANALYSIS / OPINION / FIELD NOTES / LATEST.
+ * Renders as a link when href is given (typically a post's first tag),
+ * otherwise as plain text (e.g. a section heading like "Latest").
+ */
+interface Props {
+	label: string;
+	href?: string;
+}
+
+const { label, href } = Astro.props;
+---
+
+{
+	href ? (
+		<a href={href} class="section-label">{label}</a>
+	) : (
+		<span class="section-label">{label}</span>
+	)
+}
+
+<style>
+	.section-label {
+		display: inline-block;
+		font-family: var(--font-sans);
+		font-size: var(--font-size-xs);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-wider);
+		color: var(--color-accent);
+		text-decoration: none;
+	}
+
+	a.section-label:hover {
+		color: var(--color-accent-hover);
+	}
+</style>
