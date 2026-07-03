@@ -12,6 +12,7 @@ interface Props {
 	readingTime?: number;
 	tags?: Array<{ slug: string; label: string }>;
 	bylines?: ContentBylineCredit[];
+	variant?: "lead" | "standard";
 }
 
 const {
@@ -23,6 +24,7 @@ const {
 	readingTime,
 	tags,
 	bylines,
+	variant = "standard",
 } = Astro.props;
 
 const formattedDate = date
@@ -34,7 +36,7 @@ const formattedDate = date
 	: null;
 ---
 
-<article class="post-card">
+<article class={`post-card ${variant === "lead" ? "post-card--lead" : ""}`}>
 	<a href={href} class="card-link">
 		{
 			featuredImage ? (
@@ -184,6 +186,16 @@ const formattedDate = date
 
 	.card-link:hover .card-title {
 		color: var(--color-accent);
+	}
+
+	.post-card--lead .card-title {
+		font-size: var(--font-size-3xl);
+		line-height: var(--leading-tight);
+	}
+
+	.post-card--lead .card-excerpt {
+		font-size: var(--font-size-lg);
+		-webkit-line-clamp: 3;
 	}
 
 	.card-excerpt {

@@ -74,6 +74,13 @@ const pageCtx = createPublicPageContext({
 
 // Check if user is logged in (for showing admin link)
 const isLoggedIn = !!Astro.locals.user;
+
+const today = new Date().toLocaleDateString("en-US", {
+	weekday: "long",
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
 ---
 
 <!doctype html>
@@ -103,6 +110,10 @@ const isLoggedIn = !!Astro.locals.user;
 	<body>
 		<EmDashBodyStart page={pageCtx} />
 		<header class="site-header">
+			<div class="dateline">
+				<span>{today}</span>
+				<span class="dateline-edition">Daily Edition</span>
+			</div>
 			<div class="masthead">
 				<a href="/" class="masthead-title">
 					{siteLogo
@@ -585,6 +596,23 @@ const isLoggedIn = !!Astro.locals.user;
 				background: var(--color-bg);
 			}
 
+			.dateline {
+				max-width: var(--wide-width);
+				margin: 0 auto;
+				padding: var(--spacing-2) var(--spacing-6);
+				display: flex;
+				justify-content: space-between;
+				font-family: var(--font-sans);
+				font-size: var(--font-size-xs);
+				color: var(--color-muted);
+				border-bottom: 1px solid var(--color-border-subtle);
+			}
+
+			.dateline-edition {
+				text-transform: uppercase;
+				letter-spacing: var(--tracking-wide);
+			}
+
 			.masthead {
 				max-width: var(--wide-width);
 				margin: 0 auto;
@@ -950,6 +978,14 @@ const isLoggedIn = !!Astro.locals.user;
 			}
 
 			@media (max-width: 640px) {
+				.dateline {
+					padding: var(--spacing-2) var(--spacing-4);
+				}
+
+				.dateline-edition {
+					display: none;
+				}
+
 				.masthead {
 					padding: var(--spacing-6) var(--spacing-4) var(--spacing-4);
 				}

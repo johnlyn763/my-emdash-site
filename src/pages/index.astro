@@ -166,7 +166,7 @@ function formatDate(date: Date | null | undefined) {
 							)}
 						</header>
 						<div class="posts-grid">
-							{gridPostsWithTags.map(({ post, tags, bylines }) => (
+							{gridPostsWithTags.map(({ post, tags, bylines }, i) => (
 								<PostCard
 									title={post.data.title ?? "Untitled"}
 									excerpt={post.data.excerpt}
@@ -176,6 +176,7 @@ function formatDate(date: Date | null | undefined) {
 									readingTime={getReadingTime(post.data.content)}
 									tags={tags}
 									bylines={bylines}
+									variant={i === 0 ? "lead" : "standard"}
 								/>
 							))}
 						</div>
@@ -361,7 +362,21 @@ function formatDate(date: Date | null | undefined) {
 	.posts-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-12) var(--spacing-8);
+		gap: var(--spacing-12) var(--spacing-6);
+	}
+
+	.posts-grid > :global(.post-card) {
+		border-left: 1px solid var(--color-border);
+		padding-left: var(--spacing-6);
+	}
+
+	.posts-grid > :global(.post-card:first-child) {
+		border-left: none;
+		padding-left: 0;
+	}
+
+	.posts-grid > :global(.post-card--lead) {
+		grid-column: span 2;
 	}
 
 	/* Empty State */
@@ -429,6 +444,11 @@ function formatDate(date: Date | null | undefined) {
 			grid-template-columns: repeat(2, 1fr);
 			gap: var(--spacing-8) var(--spacing-6);
 		}
+
+		.posts-grid > :global(.post-card) {
+			border-left: none;
+			padding-left: 0;
+		}
 	}
 
 	@media (max-width: 600px) {
@@ -439,6 +459,10 @@ function formatDate(date: Date | null | undefined) {
 		.posts-grid {
 			grid-template-columns: 1fr;
 			gap: var(--spacing-8);
+		}
+
+		.posts-grid > :global(.post-card--lead) {
+			grid-column: span 1;
 		}
 	}
 </style>

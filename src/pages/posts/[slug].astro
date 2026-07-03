@@ -531,6 +531,17 @@ const publishDate =
 		margin-bottom: 1.5em;
 	}
 
+	.article-content :global(p:first-of-type)::first-letter {
+		float: left;
+		font-family: var(--font-headline);
+		font-weight: 900;
+		font-size: 4.2em;
+		line-height: 0.82;
+		padding-right: 0.09em;
+		padding-top: 0.06em;
+		color: var(--color-accent);
+	}
+
 	.article-content :global(h2) {
 		font-size: var(--font-size-2xl);
 		margin-top: 2.5em;

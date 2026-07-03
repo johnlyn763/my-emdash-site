@@ -1,0 +1,202 @@
+diff --git a/src/components/PostCard.astro b/src/components/PostCard.astro
+index 858a521..1713b6c 100644
+--- a/src/components/PostCard.astro
++++ b/src/components/PostCard.astro
+@@ -12,6 +12,7 @@ interface Props {
+ 	readingTime?: number;
+ 	tags?: Array<{ slug: string; label: string }>;
+ 	bylines?: ContentBylineCredit[];
++	variant?: "lead" | "standard";
+ }
+ 
+ const {
+@@ -23,6 +24,7 @@ const {
+ 	readingTime,
+ 	tags,
+ 	bylines,
++	variant = "standard",
+ } = Astro.props;
+ 
+ const formattedDate = date
+@@ -34,7 +36,7 @@ const formattedDate = date
+ 	: null;
+ ---
+ 
+-<article class="post-card">
++<article class={`post-card ${variant === "lead" ? "post-card--lead" : ""}`}>
+ 	<a href={href} class="card-link">
+ 		{
+ 			featuredImage ? (
+@@ -186,6 +188,16 @@ const formattedDate = date
+ 		color: var(--color-accent);
+ 	}
+ 
++	.post-card--lead .card-title {
++		font-size: var(--font-size-3xl);
++		line-height: var(--leading-tight);
++	}
++
++	.post-card--lead .card-excerpt {
++		font-size: var(--font-size-lg);
++		-webkit-line-clamp: 3;
++	}
++
+ 	.card-excerpt {
+ 		font-family: var(--font-body);
+ 		font-size: var(--font-size-base);
+diff --git a/src/layouts/Base.astro b/src/layouts/Base.astro
+index a5f4312..b940705 100644
+--- a/src/layouts/Base.astro
++++ b/src/layouts/Base.astro
+@@ -74,6 +74,13 @@ const pageCtx = createPublicPageContext({
+ 
+ // Check if user is logged in (for showing admin link)
+ const isLoggedIn = !!Astro.locals.user;
++
++const today = new Date().toLocaleDateString("en-US", {
++	weekday: "long",
++	year: "numeric",
++	month: "long",
++	day: "numeric",
++});
+ ---
+ 
+ <!doctype html>
+@@ -103,6 +110,10 @@ const isLoggedIn = !!Astro.locals.user;
+ 	<body>
+ 		<EmDashBodyStart page={pageCtx} />
+ 		<header class="site-header">
++			<div class="dateline">
++				<span>{today}</span>
++				<span class="dateline-edition">Daily Edition</span>
++			</div>
+ 			<div class="masthead">
+ 				<a href="/" class="masthead-title">
+ 					{siteLogo
+@@ -585,6 +596,23 @@ const isLoggedIn = !!Astro.locals.user;
+ 				background: var(--color-bg);
+ 			}
+ 
++			.dateline {
++				max-width: var(--wide-width);
++				margin: 0 auto;
++				padding: var(--spacing-2) var(--spacing-6);
++				display: flex;
++				justify-content: space-between;
++				font-family: var(--font-sans);
++				font-size: var(--font-size-xs);
++				color: var(--color-muted);
++				border-bottom: 1px solid var(--color-border-subtle);
++			}
++
++			.dateline-edition {
++				text-transform: uppercase;
++				letter-spacing: var(--tracking-wide);
++			}
++
+ 			.masthead {
+ 				max-width: var(--wide-width);
+ 				margin: 0 auto;
+@@ -950,6 +978,14 @@ const isLoggedIn = !!Astro.locals.user;
+ 			}
+ 
+ 			@media (max-width: 640px) {
++				.dateline {
++					padding: var(--spacing-2) var(--spacing-4);
++				}
++
++				.dateline-edition {
++					display: none;
++				}
++
+ 				.masthead {
+ 					padding: var(--spacing-6) var(--spacing-4) var(--spacing-4);
+ 				}
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 10c1212..76e45c7 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -166,7 +166,7 @@ function formatDate(date: Date | null | undefined) {
+ 							)}
+ 						</header>
+ 						<div class="posts-grid">
+-							{gridPostsWithTags.map(({ post, tags, bylines }) => (
++							{gridPostsWithTags.map(({ post, tags, bylines }, i) => (
+ 								<PostCard
+ 									title={post.data.title ?? "Untitled"}
+ 									excerpt={post.data.excerpt}
+@@ -176,6 +176,7 @@ function formatDate(date: Date | null | undefined) {
+ 									readingTime={getReadingTime(post.data.content)}
+ 									tags={tags}
+ 									bylines={bylines}
++									variant={i === 0 ? "lead" : "standard"}
+ 								/>
+ 							))}
+ 						</div>
+@@ -361,7 +362,21 @@ function formatDate(date: Date | null | undefined) {
+ 	.posts-grid {
+ 		display: grid;
+ 		grid-template-columns: repeat(3, 1fr);
+-		gap: var(--spacing-12) var(--spacing-8);
++		gap: var(--spacing-12) var(--spacing-6);
++	}
++
++	.posts-grid > :global(.post-card) {
++		border-left: 1px solid var(--color-border);
++		padding-left: var(--spacing-6);
++	}
++
++	.posts-grid > :global(.post-card:first-child) {
++		border-left: none;
++		padding-left: 0;
++	}
++
++	.posts-grid > :global(.post-card--lead) {
++		grid-column: span 2;
+ 	}
+ 
+ 	/* Empty State */
+@@ -429,6 +444,11 @@ function formatDate(date: Date | null | undefined) {
+ 			grid-template-columns: repeat(2, 1fr);
+ 			gap: var(--spacing-8) var(--spacing-6);
+ 		}
++
++		.posts-grid > :global(.post-card) {
++			border-left: none;
++			padding-left: 0;
++		}
+ 	}
+ 
+ 	@media (max-width: 600px) {
+@@ -440,5 +460,9 @@ function formatDate(date: Date | null | undefined) {
+ 			grid-template-columns: 1fr;
+ 			gap: var(--spacing-8);
+ 		}
++
++		.posts-grid > :global(.post-card--lead) {
++			grid-column: span 1;
++		}
+ 	}
+ </style>
+diff --git a/src/pages/posts/[slug].astro b/src/pages/posts/[slug].astro
+index 2add1ef..2feebe0 100644
+--- a/src/pages/posts/[slug].astro
++++ b/src/pages/posts/[slug].astro
+@@ -531,6 +531,17 @@ const publishDate =
+ 		margin-bottom: 1.5em;
+ 	}
+ 
++	.article-content :global(p:first-of-type)::first-letter {
++		float: left;
++		font-family: var(--font-headline);
++		font-weight: 900;
++		font-size: 4.2em;
++		line-height: 0.82;
++		padding-right: 0.09em;
++		padding-top: 0.06em;
++		color: var(--color-accent);
++	}
++
+ 	.article-content :global(h2) {
+ 		font-size: var(--font-size-2xl);
+ 		margin-top: 2.5em;
