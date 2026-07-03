@@ -19,12 +19,11 @@ export default defineConfig({
 			database: d1({ binding: "DB", session: "auto" }),
 			storage: r2({ binding: "MEDIA" }),
 			plugins: [formsPlugin()],
-			authProviders: [
+			auth: 
 				access({
 					teamDomain: "dark-mud-7fa8.cloudflareaccess.com",
 					audience: "ee4a63020ab74d7facde592f6cef56e4363e05674f9580315cf5e7cb51cb7974",
 				}),
-			],
 			sandboxed: [webhookNotifierPlugin()],
 			sandboxRunner: sandbox(),
 			marketplace: "https://marketplace.emdashcms.com",
