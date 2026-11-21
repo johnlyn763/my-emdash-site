@@ -1,33 +1,18 @@
 ---
 /**
  * Kit (ConvertKit) inline email signup.
- *
- * Kit's embed script finds every `script[data-uid]` on the page and replaces
- * each one with a form, then loads `f.convertkit.com/ckjs/ck.*.js` once.
- * The footer instance loads the script (`loadScript` default). Other
- * instances pass `loadScript={false}` so they only emit a marker and the
- * footer script hydrates them without fetching index.js twice.
+ * The async script uses is:inline so Astro leaves it in place instead of
+ * bundling or hoisting it. Kit inserts the form at this script's location.
  */
-interface Props {
-	loadScript?: boolean;
-}
-
-const { loadScript = true } = Astro.props;
 ---
 
 <div class="kit-signup">
-	{
-		loadScript ? (
-			<script
-				is:inline
-				async
-				data-uid="62bd20fc13"
-				src="https://simple-survival-mode.kit.com/62bd20fc13/index.js"
-			></script>
-		) : (
-			<script is:inline data-uid="62bd20fc13"></script>
-		)
-	}
+	<script
+		is:inline
+		async
+		data-uid="62bd20fc13"
+		src="https://simple-survival-mode.kit.com/62bd20fc13/index.js"
+	></script>
 	<noscript>
 		<p class="kit-signup-fallback">
 			<a href="https://simple-survival-mode.kit.com/62bd20fc13"

@@ -2,7 +2,6 @@
 import { getEmDashEntry, decodeSlug } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-import KitSignup from "../../components/KitSignup.astro";
 
 const slug = decodeSlug(Astro.params.slug);
 
@@ -17,11 +16,6 @@ if (!page) {
 }
 
 Astro.cache?.set(cacheHint);
-
-// About copy lives in the CMS, so the signup is added here rather than
-// in seed/database content. loadScript is false because the site footer
-// already loads Kit's embed, which hydrates every data-uid marker on the page.
-const showSignup = slug === "about";
 ---
 
 <Base
@@ -36,14 +30,6 @@ const showSignup = slug === "about";
 		<div class="page-content">
 			<PortableText value={page.data.content} />
 		</div>
-
-		{
-			showSignup && (
-				<div class="page-signup">
-					<KitSignup loadScript={false} />
-				</div>
-			)
-		}
 	</article>
 </Base>
 
@@ -118,9 +104,5 @@ const showSignup = slug === "about";
 
 	.page-content :global(li) {
 		margin-bottom: 0.5em;
-	}
-
-	.page-signup {
-		margin-top: var(--spacing-12);
 	}
 </style>
