@@ -1,0 +1,49 @@
+---
+/**
+ * Kit (ConvertKit) inline email signup.
+ * The async script uses is:inline so Astro leaves it in place instead of
+ * bundling or hoisting it. Kit inserts the form at this script's location.
+ */
+---
+
+<div class="kit-signup">
+	<script
+		is:inline
+		async
+		data-uid="62bd20fc13"
+		src="https://simple-survival-mode.kit.com/62bd20fc13/index.js"
+	></script>
+	<noscript>
+		<p class="kit-signup-fallback">
+			<a href="https://simple-survival-mode.kit.com/62bd20fc13"
+				>Get new posts by email</a
+			>
+		</p>
+	</noscript>
+</div>
+
+<style>
+	.kit-signup {
+		width: 100%;
+		max-width: 42rem;
+	}
+
+	.kit-signup :global(.formkit-form) {
+		max-width: 100%;
+	}
+
+	.kit-signup-fallback {
+		margin: 0;
+		font-size: var(--font-size-sm);
+		color: var(--color-text-secondary);
+	}
+
+	.kit-signup-fallback a {
+		color: var(--color-text-secondary);
+		text-decoration: underline;
+	}
+
+	.kit-signup-fallback a:hover {
+		color: var(--color-text);
+	}
+</style>
