@@ -10,6 +10,7 @@ import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
 import { Font } from "astro:assets";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import KitSignup from "../components/KitSignup.astro";
 import "../styles/theme.css";
 
 interface Props {
@@ -211,6 +212,9 @@ const today = new Date().toLocaleDateString("en-US", {
 					<div class="footer-widgets-section">
 						<WidgetArea name="footer" />
 					</div>
+				</div>
+				<div class="footer-signup">
+					<KitSignup />
 				</div>
 				<div class="footer-bottom">
 					<p class="footer-copyright">
@@ -910,6 +914,10 @@ const today = new Date().toLocaleDateString("en-US", {
 				line-height: var(--leading-relaxed);
 			}
 
+			.footer-signup {
+				margin-bottom: var(--spacing-12);
+			}
+
 			.footer-bottom {
 				display: flex;
 				justify-content: space-between;
@@ -1039,6 +1047,10 @@ const today = new Date().toLocaleDateString("en-US", {
 
 				.footer-brand {
 					grid-column: span 1;
+				}
+
+				.footer-signup {
+					margin-bottom: var(--spacing-8);
 				}
 
 				.footer-bottom {
